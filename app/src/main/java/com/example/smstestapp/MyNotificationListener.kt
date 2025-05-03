@@ -23,18 +23,18 @@ class MyNotificationListenerService : NotificationListenerService() {
         val text = extras.getCharSequence("android.text")
 
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-        val sms_app = prefs.getString("sms_app", "")
-        val title_match = prefs.getString("title_match", "")
-        val body_match = prefs.getString("body_match", "")
+        val smsApp = prefs.getString("sms_app", "")
+        val titleMatch = prefs.getString("title_match", "")
+        val bodyMatch = prefs.getString("body_match", "")
         val number = prefs.getString("number", "")
         val answer = prefs.getString("answer", "")
 
-        if (packageName.equals(sms_app) && (title != null && title.contains(title_match.toString()))
-            && (text != null && text.contains(body_match.toString()))) {
+        if (packageName.equals(smsApp) && (title != null && title.contains(titleMatch.toString()))
+            && (text != null && text.contains(bodyMatch.toString()))) {
             Log.d("NotifListener", "Notification found")
-            Log.d("NotifListener", "from: ${packageName}")
-            Log.d("NotifListener", "title: ${title}")
-            Log.d("NotifListener", "text: ${text}")
+            Log.d("NotifListener", "from: $packageName")
+            Log.d("NotifListener", "title: $title")
+            Log.d("NotifListener", "text: $text")
 
             sendSMS(number.toString(), answer.toString())
             showNotification(getString(R.string.notification_title), "from: ${sbn.packageName}\ntitle: ${title}\nAutomatic answer \"${answer}\" send to ${number}")
@@ -45,7 +45,7 @@ class MyNotificationListenerService : NotificationListenerService() {
 
     }
 
-    fun showNotification(title: String, message: String) {
+    private fun showNotification(title: String, message: String) {
         val channelId = "my_channel_id"
         val channelName = "My Notification Channel"
 
