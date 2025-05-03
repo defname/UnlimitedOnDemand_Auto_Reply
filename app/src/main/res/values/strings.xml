@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">AutoDataOnDemand</string>
+    <string name="sms_permission_denied">Send SMS Permission: ❌</string>
+    <string name="sms_permission_granted">Send SMS Permission: ✅</string>
+    <string name="request_sms_permission_btn">Request SMS Permission</string>
+    <string name="notification_permission_denied">Post Notification Permission: ❌</string>
+    <string name="notification_permission_granted">Post Notification Permission: ✅</string>
+    <string name="request_notification_permission_btn">Request Notification Permission</string>
+    <string name="notification_listener_inactive">Notification Listener: ❌</string>
+    <string name="notification_listener_active">Notification Listener: ✅</string>
+    <string name="enable_notification_listener_btn">Enable Notification Listener</string>
+    <string name="edit_app_package_caption">App Package to listen for</string>
+    <string name="edit_app_package_hint">e.g., com.example.smsapp</string>
+    <string name="button_sms_app_caption">Use Standard SMS App</string>
+    <string name="edit_title_caption">Notification Title to listen for</string>
+    <string name="edit_title_hint">e.g., New Message</string>
+    <string name="edit_content_caption">Notification Content to listen for</string>
+    <string name="edit_content_hint">e.g., Your code is...</string>
+    <string name="edit_number_caption">Phone Number to send the SMS to</string>
+    <string name="edit_number_hint">+49 123 321 123</string>
+    <string name="edit_answer_caption">Text to send via SMS</string>
+    <string name="edit_answer_hint">e.g., any message</string>
+
+    <string name="notification_title">Notification Matched</string>
+</resources>
