@@ -4,6 +4,7 @@ package com.example.smstestapp
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -11,6 +12,7 @@ import android.telephony.SmsManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 
 class MyNotificationListenerService : NotificationListenerService() {
 
@@ -46,6 +48,14 @@ class MyNotificationListenerService : NotificationListenerService() {
     fun showNotification(title: String, message: String) {
         val channelId = "my_channel_id"
         val channelName = "My Notification Channel"
+
+        // check permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
 
         // Channel erstellen (nur nötig ab API 26)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
