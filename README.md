@@ -11,6 +11,8 @@ application utilizes notifications to check for incoming messages.
 When a notification from a specific app (ideally your default SMS app) with a specific title and text containing a predefined string is detected,
 the app automatically sends an SMS with a customizable message to a designated number.
 
+Please be aware that your network operator may prohibit the use of such automation in their terms and conditions. To make the automation less noticeable, the app will introduce a randomized delay before sending the reply, with the delay time customizable within a specified range.
+
 <img alt="Screenshot_20250504_134921_UnlimitedOnDemand Auto Reply" src="https://github.com/user-attachments/assets/9ca4ba17-42b1-414b-9ff1-4e6e584b5fb5" width="300" />
 
 ## Needed Permissions
