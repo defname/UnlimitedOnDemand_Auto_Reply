@@ -13,6 +13,8 @@ the app automatically sends an SMS with a customizable message to a designated n
 
 Please be aware that your network operator may prohibit the use of such automation in their terms and conditions. To make the automation less noticeable, the app will introduce a randomized delay before sending the reply, with the delay time customizable within a specified range.
 
+I should also note that while this app can automate the described task, it should be regarded strictly as a testing tool and a proof of concept. Surely, no one should rebel against the intentions of network operators...
+
 <img alt="Screenshot_20250504_134921_UnlimitedOnDemand Auto Reply" src="https://github.com/user-attachments/assets/9ca4ba17-42b1-414b-9ff1-4e6e584b5fb5" width="300" />
 
 ## Needed Permissions
