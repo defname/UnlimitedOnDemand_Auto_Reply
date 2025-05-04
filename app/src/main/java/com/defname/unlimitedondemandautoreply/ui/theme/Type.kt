@@ -1,4 +1,4 @@
-package com.example.smstestapp.ui.theme
+package com.defname.unlimitedondemandautoreply.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

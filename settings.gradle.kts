@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SmsTestApp"
+rootProject.name = "UnlimitedOnDemand Auto Reply"
 include(":app")

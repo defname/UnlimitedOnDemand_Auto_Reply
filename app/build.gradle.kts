@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smstestapp"
+    namespace = "com.defname.unlimitedondemandautoreply"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.smstestapp"
+        applicationId = "com.defname.unlimitedondemandautoreply"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

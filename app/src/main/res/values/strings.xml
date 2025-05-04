@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AutoDataOnDemand</string>
+    <string name="app_name">UnlimitedOnDemand Auto Reply</string>
     <string name="sms_permission_denied">Send SMS Permission: ❌</string>
     <string name="sms_permission_granted">Send SMS Permission: ✅</string>
     <string name="request_sms_permission_btn">Request SMS Permission</string>

@@ -1,4 +1,4 @@
-package com.example.smstestapp
+package com.defname.unlimitedondemandautoreply
 
 
 import android.app.NotificationChannel

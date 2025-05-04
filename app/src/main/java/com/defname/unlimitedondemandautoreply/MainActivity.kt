@@ -1,4 +1,4 @@
-package com.example.smstestapp
+package com.defname.unlimitedondemandautoreply
 
 import android.content.ComponentName
 import android.content.Intent
@@ -21,7 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.widget.doOnTextChanged
-import com.example.smstestapp.ui.theme.SmsTestAppTheme
+import com.defname.unlimitedondemandautoreply.ui.theme.SmsTestAppTheme
 
 private const val REQUEST_CODE_POST_NOTIFICATIONS = 1001
 
