@@ -21,5 +21,7 @@
     <string name="edit_answer_caption">Text to send via SMS</string>
     <string name="edit_answer_hint">e.g., any message</string>
 
-    <string name="notification_title">Notification Matched</string>
+    <string name="notification_title_matched">Notification Matched</string>
+    <string name="notification_title_send">Message Send</string>
+    <string name="edit_delay_caption">Delay for random min/max seconds before sending the SMS</string>
 </resources>

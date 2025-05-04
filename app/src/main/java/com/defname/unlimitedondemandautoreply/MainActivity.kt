@@ -76,6 +76,16 @@ class MainActivity : ComponentActivity() {
         editAnswer.doOnTextChanged { text, start, before, count ->
             saveSetting("answer", text.toString())
         }
+
+        val editMinDelay = findViewById<EditText>(R.id.edit_min_delay)
+        editMinDelay.doOnTextChanged { text, start, before, count ->
+            saveSetting("min_delay", text.toString())
+        }
+
+        val editMaxDelay = findViewById<EditText>(R.id.edit_max_delay)
+        editMaxDelay.doOnTextChanged { text, start, before, count ->
+            saveSetting("max_delay", text.toString())
+        }
     }
 
     override fun onResume() {
@@ -172,6 +182,8 @@ class MainActivity : ComponentActivity() {
         findViewById<EditText>(R.id.edit_content).setText(getSetting("body_match"))
         findViewById<EditText>(R.id.edit_number).setText(getSetting("number"))
         findViewById<EditText>(R.id.edit_answer).setText(getSetting("answer"))
+        findViewById<EditText>(R.id.edit_min_delay).setText(getSetting("min_delay"))
+        findViewById<EditText>(R.id.edit_max_delay).setText(getSetting("max_delay"))
     }
 
     fun saveSetting(key: String, value: String) {

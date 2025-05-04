@@ -133,5 +133,31 @@
             android:hint="@string/edit_answer_hint"
             android:inputType="text" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_delay_caption"
+            android:paddingTop="16dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+            <EditText
+                android:id="@+id/edit_min_delay"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="5"
+                android:inputType="number" />
+            <EditText
+                android:id="@+id/edit_max_delay"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="30"
+                android:inputType="number" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

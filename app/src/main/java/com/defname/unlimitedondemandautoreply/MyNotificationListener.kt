@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.telephony.SmsManager
@@ -13,6 +15,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import kotlin.random.Random
 
 class MyNotificationListenerService : NotificationListenerService() {
 
@@ -28,6 +31,9 @@ class MyNotificationListenerService : NotificationListenerService() {
         val bodyMatch = prefs.getString("body_match", "")
         val number = prefs.getString("number", "")
         val answer = prefs.getString("answer", "")
+        val minDelay = prefs.getString("min_delay", "5")?.toLong() ?: 5
+        val maxDelay = prefs.getString("max_delay", "30")?.toLong() ?: 30
+        val delay = Random.nextLong(minDelay*1000 , maxDelay*1000)
 
         if (packageName.equals(smsApp) && (title != null && title.contains(titleMatch.toString()))
             && (text != null && text.contains(bodyMatch.toString()))) {
@@ -36,8 +42,12 @@ class MyNotificationListenerService : NotificationListenerService() {
             Log.d("NotifListener", "title: $title")
             Log.d("NotifListener", "text: $text")
 
-            sendSMS(number.toString(), answer.toString())
-            showNotification(getString(R.string.notification_title), "from: ${sbn.packageName}\ntitle: ${title}\nAutomatic answer \"${answer}\" send to ${number}")
+            showNotification(getString(R.string.notification_title_matched), "from: ${sbn.packageName}\ntitle: ${title}\nwaiting for ${delay/1000}s before replying")
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                sendSMS(number.toString(), answer.toString())
+                showNotification(getString(R.string.notification_title_send), "Automatic answer \"${answer}\" send to ${number} after ${delay/1000}s")
+            }, delay)
         }
     }
 
@@ -46,8 +56,8 @@ class MyNotificationListenerService : NotificationListenerService() {
     }
 
     private fun showNotification(title: String, message: String) {
-        val channelId = "my_channel_id"
-        val channelName = "My Notification Channel"
+        val channelId = "unlimitedondemandautoreply_notification_channel"
+        val channelName = "UnlimitedOnDemand Auto Reply"
 
         // check permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(
@@ -64,7 +74,7 @@ class MyNotificationListenerService : NotificationListenerService() {
                 channelName,
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Benachrichtigungen von meiner App"
+                description = "Notifications from UnlimitedOnDemand Auto Reply"
             }
 
             val notificationManager: NotificationManager =
