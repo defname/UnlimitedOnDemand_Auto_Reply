@@ -22,6 +22,13 @@ As the primary function of the app is to send an SMS, it naturally requires the 
 If a notification matching the configured parameters is detected and an SMS is sent, the app will notify the user with a notification.
 This permission is not required for the core functionality of the app, but it helps verify that everything is working as expected.
 
-### Be a notification listener
+### Notification Listener Access
 The app must be manually configured to have permission to listen for notifications. Once enabled, the service runs in the background and performs its task;
 otherwise, the app remains inactive. This allows you to turn the service on or off as needed.
+
+## Installation
+
+If you trust me, you can simply download the APK from the releases section and install it on your Android device (you should not trust random people on the internet though).
+
+Alternatively get Android Studio running, clone the repository and build it yourself. The sourcecode is not really that complicated and reviewing it should not be too hard
+(there is just the main activity, and the notification listener).
