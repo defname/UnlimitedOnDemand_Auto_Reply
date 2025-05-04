@@ -25,11 +25,21 @@ import com.defname.unlimitedondemandautoreply.ui.theme.SmsTestAppTheme
 
 private const val REQUEST_CODE_POST_NOTIFICATIONS = 1001
 
+/**
+ * MainActivity for the app.
+ * Display the status of the permissions with a button to request them.
+ * Display the status of the notification listener with a button to enable it.
+ * Configure the settings for the app.
+ */
 class MainActivity : ComponentActivity() {
+    /**
+     * initialize all ui event handler
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.main_activity)
+
 
         val requestSMSPermissionBtn = findViewById<Button>(R.id.button_request_sms_permission)
         requestSMSPermissionBtn.setOnClickListener {
@@ -88,6 +98,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * update the ui when the activity is resumed
+     */
     override fun onResume() {
         super.onResume()
 
@@ -120,7 +133,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkNotificationPermission(): Boolean {
-
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             Log.d("SmsTestApp", "SDK < Tiramisu")
             return true
