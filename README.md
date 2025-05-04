@@ -32,10 +32,36 @@ otherwise, the app remains inactive. This allows you to turn the service on or o
 
 ## Installation
 
-If you trust me, you can simply download the APK from the releases section and install it on your Android device (you should not trust random people on the internet though).
+If you trust me, you can simply download the APK from the [releases section](https://github.com/defname/UnlimitedOnDemand_Auto_Reply/releases) and install it on your Android device (you should not trust random people on the internet though).
 
 Alternatively get Android Studio running, clone the repository and build it yourself. The sourcecode is not really that complicated and reviewing it should not be too hard
 (there is just the main activity, and the notification listener).
+
+## Usage
+After installing the app, some configuration is required.
+
+### Give Permissions
+Tap the first two buttons and confirm the dialogs. This grants the app permission to send SMS and post notifications.
+
+### Enable the Notification Listener Service
+Tap the third button and select this app from the list. Ensure it has all required permissions, especially to read messaging notifications.
+This is how the service is enabled and where you can disable it again.
+
+### Set the Criteria to Identify the Relevant Notification
+
+- **App Package:** Select your default SMS app (use the fourth button for automatic detection).
+- **Notification Title:** Typically, the sender's number (e.g., your provider).
+- **Notification Text:** A unique keyword or phrase from the SMS body is sufficient.
+
+### Configure the outgoing SMS
+
+- **Target Number:** Usually the same as the sender's number.
+- **Reply Text:** The message you want to send back (e.g., "2" to request 2 GB).
+- **Delay Range:** To avoid looking automated, the app waits a random number of seconds within this range before replying.
+
+When the app is configured and the service is running, the first outgoing SMS still requires manual confirmation.  
+However, you can choose to allow all future messages to be sent automatically.  
+From that point on, the app will operate without any further user interaction.
 
 ## License
 This project is licensed under the GNU General Public License v3.0 or later – see the [LICENSE](LICENSE) file for details.
