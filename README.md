@@ -36,3 +36,6 @@ If you trust me, you can simply download the APK from the releases section and i
 
 Alternatively get Android Studio running, clone the repository and build it yourself. The sourcecode is not really that complicated and reviewing it should not be too hard
 (there is just the main activity, and the notification listener).
+
+## License
+This project is licensed under the GNU General Public License v3.0 or later – see the [LICENSE](LICENSE) file for details.
