@@ -40,20 +40,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -80,31 +88,26 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SmsTestAppTheme {
-                MainScreen(
-                    onSaveSetting = ::saveSetting,
-                    onGetSetting = ::getSetting,
-                    onRequestSMSPermissions = ::requestSMSPermissions,
-                    checkSMSPermissions = ::checkSMSPermissions,
-                    onRequestNotificationPermission = ::requestNotificationPermission,
-                    checkNotificationPermission = ::checkNotificationPermission,
-                    onRequestNotificationService = ::requestNotificationService,
-                    checkNotificationServiceEnabled = ::checkNotificationServiceEnabled,
-                    getDefaultSmsPackage = { Telephony.Sms.getDefaultSmsPackage(this) }
-                )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainScreen(this)
+                }
             }
         }
     }
 
-    private fun checkSMSPermissions(): Boolean {
+    fun checkSMSPermissions(): Boolean {
         return checkSelfPermission(android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestSMSPermissions() {
+    fun requestSMSPermissions() {
         Log.d("MainActivity", "request permissions")
         requestPermissions(arrayOf(android.Manifest.permission.SEND_SMS), PackageManager.PERMISSION_GRANTED)
     }
 
-    private fun checkNotificationPermission(): Boolean {
+    fun checkNotificationPermission(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             Log.d("SmsTestApp", "SDK < Tiramisu")
             return true
@@ -117,7 +120,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun requestNotificationPermission() {
+    fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
                 this,
@@ -127,13 +130,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun checkNotificationServiceEnabled(): Boolean {
+    fun checkNotificationServiceEnabled(): Boolean {
         val cn = ComponentName(this, MyNotificationListenerService::class.java)
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         return flat?.contains(cn.flattenToString()) == true
     }
 
-    private fun requestNotificationService() {
+    fun requestNotificationService() {
         startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
 
@@ -149,7 +152,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
+fun SettingsScreen(
     onSaveSetting: (String, String) -> Unit,
     onGetSetting: (String) -> String,
     onRequestSMSPermissions: () -> Unit,
@@ -195,8 +198,6 @@ fun MainScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // Nutzt Safe Drawing Insets, um Notch/Kamera auszuweichen
-                .padding(WindowInsets.safeDrawing.asPaddingValues())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -361,3 +362,69 @@ fun MainScreen(
         }
     }
 }
+
+@Composable
+fun MainScreen(activity: MainActivity) {
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Einstellungen", "Logs")
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            // Nutzt Safe Drawing Insets, um Notch/Kamera auszuweichen
+            .padding(WindowInsets.safeDrawing.asPaddingValues())
+    ) {
+        TabRow(selectedTabIndex = selectedTab) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = { Text(title) }
+                )
+            }
+        }
+
+        when (selectedTab) {
+            0 -> SettingsScreen(
+                onSaveSetting = activity::saveSetting,
+                onGetSetting = activity::getSetting,
+                onRequestSMSPermissions = activity::requestSMSPermissions,
+                checkSMSPermissions = activity::checkSMSPermissions,
+                onRequestNotificationPermission = activity::requestNotificationPermission,
+                checkNotificationPermission = activity::checkNotificationPermission,
+                onRequestNotificationService = activity::requestNotificationService,
+                checkNotificationServiceEnabled = activity::checkNotificationServiceEnabled,
+                getDefaultSmsPackage = { Telephony.Sms.getDefaultSmsPackage(activity) }
+            ) // Deine bisherige UI
+            1 -> LogScreen()      // Die neue Log-Ansicht
+        }
+    }
+}
+
+@Composable
+fun LogScreen() {
+    val logs = LogManager.logs
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        items(logs) { entry ->
+            Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                Text(
+                    text = "[${entry.timestamp}]",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = entry.message,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Divider(color = Color.LightGray, thickness = 0.5.dp)
+        }
+    }
+}
+

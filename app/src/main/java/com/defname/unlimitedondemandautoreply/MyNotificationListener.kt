@@ -76,8 +76,7 @@ class MyNotificationListenerService : NotificationListenerService() {
         if (packageName.equals(smsApp) && (title != null && title.contains(titleMatch ?: ""))
             && (text != null && text.contains(bodyMatch.toString()))) {
             Log.d("NotifListener", "Notification matched")
-
-            showNotification(getString(R.string.notification_title_matched), "from: ${sbn.packageName}\ntitle: ${title}\nwaiting for ${delay/1000}s before replying")
+            LogManager.addLog("Notification matched. Waiting for ${delay/1000}s...")
 
             // send the SMS after the specified delay
             Handler(Looper.getMainLooper()).postDelayed({
@@ -148,16 +147,63 @@ class MyNotificationListenerService : NotificationListenerService() {
                 throw IllegalStateException("SmsManager service not available")
             }
 
-            smsManager.sendTextMessage(phone, null, msg, null, null)
-            Log.d("NotifListener", "SMS successfully triggered for $phone")
-            
-            // Erfolg weiterhin in der Benachrichtigungsleiste anzeigen
-            showNotification(getString(R.string.notification_title_send), "Automatic answer \"$msg\" send to $phone")
+            val intent = android.content.Intent("SMS_SENT")
+            intent.setPackage(packageName)
+
+            val sentIntent = android.app.PendingIntent.getBroadcast(
+                this,
+                0,
+                intent,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    android.app.PendingIntent.FLAG_IMMUTABLE
+                else 0
+            )
+
+            smsManager.sendTextMessage(phone, null, msg, sentIntent, null)
+            Log.d("NotifListener", "SMS process started for $phone")
 
         } catch (e: Exception) {
             Log.e("NotifListener", "Error sending SMS: ${e.message}")
             // Fehler als Toast (Meldung unten) anzeigen
             Toast.makeText(this, "SMS Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            LogManager.addLog("SMS Error: ${e.localizedMessage}")
         }
+    }
+
+    private val smsStatusReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            val code = resultCode
+            val message = when (code) {
+                android.app.Activity.RESULT_OK -> "SMS sent successfully!"
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE -> "Error: Generic failure (maybe no balance?)"
+                SmsManager.RESULT_ERROR_NO_SERVICE -> "Error: No service (no network)"
+                SmsManager.RESULT_ERROR_NULL_PDU -> "Error: PDU empty"
+                SmsManager.RESULT_ERROR_RADIO_OFF -> "Error: Airplane mode active"
+                // This case usually happens if permission is denied or revoked
+                else -> "SMS delivery failed (Code: $code). Permission missing?"
+            }
+
+            Log.d("NotifListener", "Receiver Result: $code -> $message")
+            LogManager.addLog(message)
+            // Optional: Benachrichtigung anzeigen
+            showNotification("SMS Status", message)
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Den Receiver beim Start des Service registrieren
+        val filter = android.content.IntentFilter("SMS_SENT")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(smsStatusReceiver, filter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(smsStatusReceiver, filter)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Wichtig: Wieder abmelden
+        unregisterReceiver(smsStatusReceiver)
     }
 }
