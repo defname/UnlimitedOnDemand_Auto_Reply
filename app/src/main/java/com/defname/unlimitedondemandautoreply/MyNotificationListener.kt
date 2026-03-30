@@ -31,6 +31,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.telephony.SmsManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -59,26 +60,29 @@ class MyNotificationListenerService : NotificationListenerService() {
         val bodyMatch = prefs.getString("body_match", "")
         val number = prefs.getString("number", "")
         val answer = prefs.getString("answer", "")
-        val minDelay = prefs.getString("min_delay", "5")?.toLong() ?: 5
-        val maxDelay = prefs.getString("max_delay", "30")?.toLong() ?: 30
+        val minDelay = prefs.getString("min_delay", "5")?.toLongOrNull() ?: 5
+        val maxDelay = prefs.getString("max_delay", "30")?.toLongOrNull() ?: 30
 
-        // calculate a random delay within the specified range
-        val delay = Random.nextLong(minDelay*1000 , maxDelay*1000)
+        // calculate a random delay within the specified range (ensure max > min)
+        val minMillis = minDelay * 1000
+        val maxMillis = maxOf(minMillis + 1000, maxDelay * 1000)
+        val delay = Random.nextLong(minMillis, maxMillis)
+
+        Log.d("NotifListener", "onNotificationPosted")
+        Log.d("NotifListener", "from: $packageName")
+        Log.d("NotifListener", "title: $title")
+        Log.d("NotifListener", "text: $text")
 
         // check if the notification matches the specified criteria
-        if (packageName.equals(smsApp) && (title != null && title.contains(titleMatch.toString()))
+        if (packageName.equals(smsApp) && (title != null && title.contains(titleMatch ?: ""))
             && (text != null && text.contains(bodyMatch.toString()))) {
-            Log.d("NotifListener", "Notification found")
-            Log.d("NotifListener", "from: $packageName")
-            Log.d("NotifListener", "title: $title")
-            Log.d("NotifListener", "text: $text")
+            Log.d("NotifListener", "Notification matched")
 
             showNotification(getString(R.string.notification_title_matched), "from: ${sbn.packageName}\ntitle: ${title}\nwaiting for ${delay/1000}s before replying")
 
             // send the SMS after the specified delay
             Handler(Looper.getMainLooper()).postDelayed({
                 sendSMS(number.toString(), answer.toString())
-                showNotification(getString(R.string.notification_title_send), "Automatic answer \"${answer}\" send to ${number} after ${delay/1000}s")
             }, delay)
         }
     }
@@ -125,7 +129,7 @@ class MyNotificationListenerService : NotificationListenerService() {
 
         // post notification
         with(NotificationManagerCompat.from(applicationContext)) {
-            notify(1, builder.build()) // ID = 1, kann beliebig gewählt werden
+            notify(System.currentTimeMillis().toInt(), builder.build())
         }
     }
 
@@ -133,8 +137,28 @@ class MyNotificationListenerService : NotificationListenerService() {
      * Send an SMS to the given number with the given message.
      */
     private fun sendSMS(number: String, msg: String) {
-        val phone = number.filter { it.isDigit() || it == '+' }
-        val smsManager = SmsManager.getDefault()
-        smsManager.sendTextMessage(phone, null, msg, null, null)
+        try {
+            val phone = number.filter { it.isDigit() || it == '+' }
+
+            if (phone.isEmpty()) {
+                throw IllegalArgumentException("Phone number is empty after filtering")
+            }
+
+            val smsManager = getSystemService(SmsManager::class.java)
+            if (smsManager == null) {
+                throw IllegalStateException("SmsManager service not available")
+            }
+
+            smsManager.sendTextMessage(phone, null, msg, null, null)
+            Log.d("NotifListener", "SMS successfully triggered for $phone")
+            
+            // Erfolg weiterhin in der Benachrichtigungsleiste anzeigen
+            showNotification(getString(R.string.notification_title_send), "Automatic answer \"$msg\" send to $phone")
+
+        } catch (e: Exception) {
+            Log.e("NotifListener", "Error sending SMS: ${e.message}")
+            // Fehler als Toast (Meldung unten) anzeigen
+            Toast.makeText(this, "SMS Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+        }
     }
 }

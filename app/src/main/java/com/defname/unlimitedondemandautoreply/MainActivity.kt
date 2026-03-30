@@ -27,19 +27,41 @@ import android.os.Bundle
 import android.provider.Settings
 import android.provider.Telephony
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.widget.doOnTextChanged
 import com.defname.unlimitedondemandautoreply.ui.theme.SmsTestAppTheme
 
 private const val REQUEST_CODE_POST_NOTIFICATIONS = 1001
@@ -57,77 +79,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.main_activity)
 
-
-        val requestSMSPermissionBtn = findViewById<Button>(R.id.button_request_sms_permission)
-        requestSMSPermissionBtn.setOnClickListener {
-            requestSMSPermissions()
+        setContent {
+            SmsTestAppTheme {
+                MainScreen(
+                    onSaveSetting = ::saveSetting,
+                    onGetSetting = ::getSetting,
+                    onRequestSMSPermissions = ::requestSMSPermissions,
+                    checkSMSPermissions = ::checkSMSPermissions,
+                    onRequestNotificationPermission = ::requestNotificationPermission,
+                    checkNotificationPermission = ::checkNotificationPermission,
+                    onRequestNotificationService = ::requestNotificationService,
+                    checkNotificationServiceEnabled = ::checkNotificationServiceEnabled,
+                    getDefaultSmsPackage = { Telephony.Sms.getDefaultSmsPackage(this) }
+                )
+            }
         }
-
-        val requestNotificationPermissionBtn = findViewById<Button>(R.id.button_request_notification_permission)
-        requestNotificationPermissionBtn.setOnClickListener {
-            requestNotificationPermission()
-        }
-
-        val enableListenerServiceBtn = findViewById<Button>(R.id.button_enable_notification_listener)
-        enableListenerServiceBtn.setOnClickListener {
-            requestNotificationService()
-        }
-
-        val useStandardSmsAppBtn = findViewById<Button>(R.id.button_use_standard_sms_app)
-        useStandardSmsAppBtn.setOnClickListener {
-            val defaultSmsPackage = Telephony.Sms.getDefaultSmsPackage(this)
-            findViewById<EditText>(R.id.edit_app_package).setText(defaultSmsPackage)
-        }
-
-        val editSmsAppInput = findViewById<EditText>(R.id.edit_app_package)
-        editSmsAppInput.doOnTextChanged { text, start, before, count ->
-            saveSetting("sms_app", text.toString())
-        }
-
-        val editTitle = findViewById<EditText>(R.id.edit_title)
-        editTitle.doOnTextChanged { text, start, before, count ->
-            saveSetting("title_match", text.toString())
-        }
-
-        val editBody = findViewById<EditText>(R.id.edit_content)
-        editBody.doOnTextChanged { text, start, before, count ->
-            saveSetting("body_match", text.toString())
-        }
-
-        val editNumber = findViewById<EditText>(R.id.edit_number)
-        editNumber.doOnTextChanged { text, start, before, count ->
-            saveSetting("number", text.toString())
-        }
-
-        val editAnswer = findViewById<EditText>(R.id.edit_answer)
-        editAnswer.doOnTextChanged { text, start, before, count ->
-            saveSetting("answer", text.toString())
-        }
-
-        val editMinDelay = findViewById<EditText>(R.id.edit_min_delay)
-        editMinDelay.doOnTextChanged { text, start, before, count ->
-            saveSetting("min_delay", text.toString())
-        }
-
-        val editMaxDelay = findViewById<EditText>(R.id.edit_max_delay)
-        editMaxDelay.doOnTextChanged { text, start, before, count ->
-            saveSetting("max_delay", text.toString())
-        }
-    }
-
-    /**
-     * update the ui when the activity is resumed
-     */
-    override fun onResume() {
-        super.onResume()
-
-        updateSMSPermissionIndicator()
-        updateNotificationInidicator()
-        updateNotificationServiceIndicator()
-
-        updateTextInputsFromPreferences()
     }
 
     private fun checkSMSPermissions(): Boolean {
@@ -137,18 +104,6 @@ class MainActivity : ComponentActivity() {
     private fun requestSMSPermissions() {
         Log.d("MainActivity", "request permissions")
         requestPermissions(arrayOf(android.Manifest.permission.SEND_SMS), PackageManager.PERMISSION_GRANTED)
-    }
-
-    private fun updateSMSPermissionIndicator() {
-        val permissionStatusTextView = findViewById<TextView>(R.id.sms_permission_status)
-        val requestPermissionBtn = findViewById<Button>(R.id.button_request_sms_permission)
-        if (checkSMSPermissions()) {
-            permissionStatusTextView.text = getString(R.string.sms_permission_granted)
-            requestPermissionBtn.setEnabled(false)
-        }
-        else {
-            permissionStatusTextView.text = getString(R.string.sms_permission_denied)
-        }
     }
 
     private fun checkNotificationPermission(): Boolean {
@@ -174,18 +129,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun updateNotificationInidicator() {
-        val notificationStatusTextView = findViewById<TextView>(R.id.notification_permission_status)
-        val requestPermissionBtn = findViewById<Button>(R.id.button_request_notification_permission)
-        if (checkNotificationPermission()) {
-            notificationStatusTextView.text = getString(R.string.notification_permission_granted)
-            requestPermissionBtn.setEnabled(false)
-        }
-        else {
-            notificationStatusTextView.text = getString(R.string.notification_permission_denied)
-        }
-    }
-
     private fun checkNotificationServiceEnabled(): Boolean {
         val cn = ComponentName(this, MyNotificationListenerService::class.java)
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
@@ -194,27 +137,6 @@ class MainActivity : ComponentActivity() {
 
     private fun requestNotificationService() {
         startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-    }
-
-    private fun updateNotificationServiceIndicator() {
-        val notificationServiceIndicatorTextView = findViewById<TextView>(R.id.notification_listener_status)
-
-        if (checkNotificationServiceEnabled()) {
-            notificationServiceIndicatorTextView.text = getString(R.string.notification_listener_active)
-        }
-        else {
-            notificationServiceIndicatorTextView.text = getString(R.string.notification_listener_inactive)
-        }
-    }
-
-    private fun updateTextInputsFromPreferences() {
-        findViewById<EditText>(R.id.edit_app_package).setText(getSetting("sms_app"))
-        findViewById<EditText>(R.id.edit_title).setText(getSetting("title_match"))
-        findViewById<EditText>(R.id.edit_content).setText(getSetting("body_match"))
-        findViewById<EditText>(R.id.edit_number).setText(getSetting("number"))
-        findViewById<EditText>(R.id.edit_answer).setText(getSetting("answer"))
-        findViewById<EditText>(R.id.edit_min_delay).setText(getSetting("min_delay"))
-        findViewById<EditText>(R.id.edit_max_delay).setText(getSetting("max_delay"))
     }
 
     fun saveSetting(key: String, value: String) {
@@ -229,17 +151,215 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun MainScreen(
+    onSaveSetting: (String, String) -> Unit,
+    onGetSetting: (String) -> String,
+    onRequestSMSPermissions: () -> Unit,
+    checkSMSPermissions: () -> Boolean,
+    onRequestNotificationPermission: () -> Unit,
+    checkNotificationPermission: () -> Boolean,
+    onRequestNotificationService: () -> Unit,
+    checkNotificationServiceEnabled: () -> Boolean,
+    getDefaultSmsPackage: () -> String?
+) {
+    var smsPermissionGranted by remember { mutableStateOf(checkSMSPermissions()) }
+    var notificationPermissionGranted by remember { mutableStateOf(checkNotificationPermission()) }
+    var notificationServiceEnabled by remember { mutableStateOf(checkNotificationServiceEnabled()) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SmsTestAppTheme {
-        Greeting("Android")
+    var smsAppPackage by remember { mutableStateOf(onGetSetting("sms_app")) }
+    var titleMatch by remember { mutableStateOf(onGetSetting("title_match")) }
+    var bodyMatch by remember { mutableStateOf(onGetSetting("body_match")) }
+    var number by remember { mutableStateOf(onGetSetting("number")) }
+    var answer by remember { mutableStateOf(onGetSetting("answer")) }
+    var minDelay by remember { mutableStateOf(onGetSetting("min_delay")) }
+    var maxDelay by remember { mutableStateOf(onGetSetting("max_delay")) }
+
+    // Aktualisieren Sie den Status, wenn die Composable-Funktion neu zusammengesetzt wird (z. B. nach onResume)
+    LaunchedEffect(Unit) {
+        smsPermissionGranted = checkSMSPermissions()
+        notificationPermissionGranted = checkNotificationPermission()
+        notificationServiceEnabled = checkNotificationServiceEnabled()
+        // Laden Sie die Einstellungen neu, falls sie extern geändert wurden
+        smsAppPackage = onGetSetting("sms_app")
+        titleMatch = onGetSetting("title_match")
+        bodyMatch = onGetSetting("body_match")
+        number = onGetSetting("number")
+        answer = onGetSetting("answer")
+        minDelay = onGetSetting("min_delay")
+        maxDelay = onGetSetting("max_delay")
+    }
+
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                // Nutzt Safe Drawing Insets, um Notch/Kamera auszuweichen
+                .padding(WindowInsets.safeDrawing.asPaddingValues())
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // SMS Permission Status
+            Text(
+                text = if (smsPermissionGranted) stringResource(R.string.sms_permission_granted)
+                else stringResource(R.string.sms_permission_denied),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            androidx.compose.material3.Button(
+                onClick = {
+                    onRequestSMSPermissions()
+                },
+                enabled = !smsPermissionGranted
+            ) {
+                Text(stringResource(R.string.request_sms_permission_btn))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Notification Permission Status
+            Text(
+                text = if (notificationPermissionGranted) stringResource(R.string.notification_permission_granted)
+                else stringResource(R.string.notification_permission_denied),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            androidx.compose.material3.Button(
+                onClick = {
+                    onRequestNotificationPermission()
+                },
+                enabled = !notificationPermissionGranted
+            ) {
+                Text(stringResource(R.string.request_notification_permission_btn))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Notification Listener Status
+            Text(
+                text = if (notificationServiceEnabled) stringResource(R.string.notification_listener_active)
+                else stringResource(R.string.notification_listener_inactive),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            androidx.compose.material3.Button(onClick = {
+                onRequestNotificationService()
+            }) {
+                Text(stringResource(R.string.enable_notification_listener_btn))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Input: App Package
+            OutlinedTextField(
+                value = smsAppPackage,
+                onValueChange = {
+                    smsAppPackage = it
+                    onSaveSetting("sms_app", it)
+                },
+                label = { Text(stringResource(R.string.edit_app_package_caption)) },
+                placeholder = { Text(stringResource(R.string.edit_app_package_hint)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            androidx.compose.material3.Button(onClick = {
+                getDefaultSmsPackage()?.let {
+                    smsAppPackage = it
+                    onSaveSetting("sms_app", it)
+                }
+            }) {
+                Text(stringResource(R.string.button_sms_app_caption))
+            }
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Input: Title to match
+            OutlinedTextField(
+                value = titleMatch,
+                onValueChange = {
+                    titleMatch = it
+                    onSaveSetting("title_match", it)
+                },
+                label = { Text(stringResource(R.string.edit_title_caption)) },
+                placeholder = { Text(stringResource(R.string.edit_title_hint)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Input: Content to match
+            OutlinedTextField(
+                value = bodyMatch,
+                onValueChange = {
+                    bodyMatch = it
+                    onSaveSetting("body_match", it)
+                },
+                label = { Text(stringResource(R.string.edit_content_caption)) },
+                placeholder = { Text(stringResource(R.string.edit_content_hint)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Input: Number
+            OutlinedTextField(
+                value = number,
+                onValueChange = {
+                    number = it
+                    onSaveSetting("number", it)
+                },
+                label = { Text(stringResource(R.string.edit_number_caption)) },
+                placeholder = { Text(stringResource(R.string.edit_number_hint)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Input: Answer
+            OutlinedTextField(
+                value = answer,
+                onValueChange = {
+                    answer = it
+                    onSaveSetting("answer", it)
+                },
+                label = { Text(stringResource(R.string.edit_answer_caption)) },
+                placeholder = { Text(stringResource(R.string.edit_answer_hint)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(stringResource(R.string.edit_delay_caption), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 16.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = minDelay,
+                    onValueChange = {
+                        minDelay = it
+                        onSaveSetting("min_delay", it)
+                    },
+                    label = { Text("Min (s)") },
+                    placeholder = { Text("5") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                )
+                OutlinedTextField(
+                    value = maxDelay,
+                    onValueChange = {
+                        maxDelay = it
+                        onSaveSetting("max_delay", it)
+                    },
+                    label = { Text("Max (s)") },
+                    placeholder = { Text("30") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
     }
 }
