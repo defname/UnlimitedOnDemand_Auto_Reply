@@ -194,11 +194,12 @@ class MyNotificationListenerService : NotificationListenerService() {
         super.onCreate()
         // Den Receiver beim Start des Service registrieren
         val filter = android.content.IntentFilter("SMS_SENT")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(smsStatusReceiver, filter, RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(smsStatusReceiver, filter)
-        }
+        ContextCompat.registerReceiver(
+            this,
+            smsStatusReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
     override fun onDestroy() {
