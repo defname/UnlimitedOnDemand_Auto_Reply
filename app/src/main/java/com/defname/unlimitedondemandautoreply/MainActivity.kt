@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
     fun requestSMSPermissions() {
         Log.d("MainActivity", "request permissions")
-        requestPermissions(arrayOf(android.Manifest.permission.SEND_SMS), PackageManager.PERMISSION_GRANTED)
+        requestPermissions(arrayOf(android.Manifest.permission.SEND_SMS), 1002)
     }
 
     fun checkNotificationPermission(): Boolean {
