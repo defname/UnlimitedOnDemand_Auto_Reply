@@ -12,8 +12,8 @@ android {
         applicationId = "com.defname.unlimitedondemandautoreply"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "v0.2-alpha"
+        versionCode = 3
+        versionName = "v0.3-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
